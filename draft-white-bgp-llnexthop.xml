@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+     which is available here: http://xml2rfc.tools.ietf.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+     There has to be one entity for each item to be referenced. 
+     An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC2545 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2545.xml">
+<!ENTITY RFC2629 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2629.xml">
+<!ENTITY RFC3552 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml">
+<!ENTITY RFC4271 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4271.xml">
+<!ENTITY RFC4291 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4291.xml">
+<!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
+]>
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc strict="yes" ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="4"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="yes" ?>
+<?rfc subcompact="no" ?>
+<rfc category="std" docName="draft-white-linklocalnh-00" ipr="full3978">
+
+<front>
+
+<title>Link Local Next Hop Handling for BGP</title>
+
+<author fullname="Russ White" initials="R.W." role="author" surname="White">
+<organization>Juniper Networks</organization>
+<address>
+<postal><street></street></postal>
+<email>russ@riw.us</email>
+</address>
+</author>
+
+<author fullname="Donald Sharp" initials="D.S." role="author" surname="Sharp">
+<organization>Cumulus Networks</organization>
+<address>
+<postal><street></street></postal>
+<email>sharpd@cumulusnetworks.com</email>
+</address>
+</author>
+
+<author fullname="Dinesh Dutt" initials="D.D." role="author" surname="Dutt">
+<organization></organization>
+<address>
+<postal><street></street></postal>
+<email>didutt@gmail.com</email>
+</address>
+</author>
+
+<author fullname="Bisajit Sadhu" initials="B.S" role="author" surname="Sadhu">
+<organization>VMWare</organization>
+<address>
+<postal><street></street></postal>
+<email>sadhub@vmware.com</email>
+</address>
+</author>
+
+
+<date month="March" year="2007" />
+
+<area>Routing</area>
+<workgroup>Interdomain Routing</workgroup>
+
+<abstract>
+
+<t>BGP, described in <xref target="RFC4271" />, was originally designed to provide reachability between domains and between the edges of a domain. As such, BGP assumes the next hop towards any reachable destination may not reside on the advertising speaker, but rather may either be through a router connected to the same subnet as the speaker, or through a router only reachable by traversing multiple hops through the network. Because of this, BGP does not recognize the use of IPv6 link local addresses, as described in <xref target="RFC4291" />, as a valid next hop for forwarding purposes.</t>
+
+<t>However, BGP speakers are now often deployed on point-to-point links in networks where multihop reachability of any kind is not assumed or desired (all next hops are assumed to be the speaker reachable through a directly connected point-to-point link). This is common, for instance, in data center fabrics. In these situations, a global IPv6 address is not required for the advertisement of reachability information; in fact, providing global IPv6 addresses in these kinds of networks can be detrimental to Zero Touch Provisioning (ZTP).</t>
+
+<t>This draft standardizes the operation of BGP over a point-to-point link using only link local IPv6 addressing.</t>
+
+</abstract>
+</front>
+
+<middle>
+  
+<section title="Introduction">
+
+<t>BGP, described in <xref target="RFC4271" />, was originally designed to provide reachability between domains and between the edges of a domain. As such, BGP assumes the next hop towards any reachable destination may not reside on the advertising speaker, but rather may either be through a router connected to the same subnet as the speaker, or through a router only reachable by traversing multiple hops through the network. Because of this, BGP does not recognize the use of IPv6 link local addresses, as described in <xref target="RFC4271" />, as a valid next hop for forwarding purposes.</t>
+
+<t>However, BGP speakers are now often deployed on point-to-point links in networks where multihop reachability of any kind is not assumed or desired (all next hops are assumed to be the speaker reachable through a directly connected point-to-point link). This is common, for instance, in data center fabrics. In these situations, a global IPv6 address is not required for the advertisement of reachability information; in fact, providing global IPv6 addresses in these kinds of networks can be detrimental to Zero Touch Provisioning (ZTP).</t>
+
+</section>
+<!-- end of introduction -->
+
+<section title="Changes to BGP Next Hop Attribute to Support Link Local on Point-to-Point">
+
+<t><xref target="RFC2545" />, section 2, notes link local IPv6 addresses are not generally suitable for use in the Next Hop field of the MP_REACH_NLRI. In order to support the many uses of link local addresses, however, <xref target="RFC2545" /> constructs the Next Hop field in IPv6 route advertisements by setting the length of the field to 32, and including both a link local and global IPv6 address in the resulting enlarged field. In this way, the receiving BGP speaker can use the global IPv6 address to build local forwarding information, and the link local address for ICMPv6 redirects, etc. <xref target="RFC2545" /> does not, however, provide for situations where there is only a link local IPv6 address in the Next Hop field of the MP_REACH_NLRI. The result is each implementation which supports link local peering along with forwarding to a link local address has implemented the construction of the Next Hop field in the MP_REACH_NLRI when there is only a link local address available in slightly different ways.</t>
+
+<t>To indicate a link local forwarding address in the Next Hop field of the MP_REACH_NLRI, implementations SHOULD set the length of the Next Hop field to 16 and include only the IPv6 link local address in the Next Hop field. Alternatively, implementations MAY set the length of the Next Hop field to 32 and include a global address of 0::0/0 in the global IPv6 Next Hop field of the MP_REACH_NLRI. Implementations MUST use one of these two methods to indicate the link local address is to be used for forwarding.</t>
+
+</section>
+<!-- end of changes to BGP next hop section -->
+
+<section title="Receiver Processing of IPv6 Link Local Forwarding Addresses">
+
+<t>On receiving an MP_REACH_NLRI with a Next Hop length of 32, and 0::0/0 in the global IPv6 address, implementations SHOULD use the link local address contained in the Next Hop field to form forwarding information.</t>
+
+<t>On receiving an MP_REACH_NLRI with a Next Hop length of 16, implementations SHOULD form the forwarding information using the IPv6 next hop contained in the Next Hop field, regardless of whether it is a link local or globally reachable IPv6 address.</t>
+
+<t>Implementations SHOULD check the validity of any IPv6 link local address used to calculate forwarding information by insuring the address is in the local neighbor table for the interface on which the BGP update was received (or through which the BGP speaker from which the update was received is reachable).</t>
+
+<t>If the Next Hop field is malformed, the implementation MUST send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation SHOULD send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
+
+</section>
+<!-- end of receiver processing of IPv6 link local forwarding addresses -->
+
+<section anchor="Acknowledgements" title="Acknowledgements">
+<t>This template was derived from an initial version written by Pekka
+Savola and contributed by him to the xml2rfc project.</t>
+
+<t>The authors would like to thank Don Slice for his invaluable contribution to this draft. The authors would also like to thank acknolwedge Vipin Kumar, Pradosh Mohapatra, and Mike Valentine for their prior work in this area.</t>
+
+<t>This document is part of a plan to make xml2rfc indispensable <xref target="DOMINATION"></xref>.</t>
+
+</section>
+<!-- end of acknolwedgments section -->
+
+<section anchor="IANA" title="IANA Considerations">
+
+<t>This memo requests IANA assign a number from the "Error Subcodes" registry defined in the IANA Considerations section in <xref target="RFC4271" />. This allocation will be for a new UPDATE error subcode, code (TBA), with a value of "Unreachable Link Local Address."</t>
+
+</section>
+<!-- end of iana considerations section -->
+
+<section anchor="Security" title="Security Considerations">
+
+<t>The mechanism described in this draft can be used as a component of ZTP for building BGP adjacencies across point-to-point links. This method, then, can be used by an attacker to form a peering session with a BGP speaker, ultimately advertising incorrect routing information into a routing domain in order to misdirect traffic or cause a denial of service. By using link local IPv6 addresses, the attacker would be able to forego the use of a valid IPv6 address within the domain, making such an attack easier.</t>
+
+<t>Operators SHOULD filter traffic on links where BGP peering is not intended to occur to prevent speakers from accepting BGP session requests. Operators MAY also use some form of cryptographic validation on links within the network to prevent unauthorized devices from forming BGP peering sessions. Operators also MAY instruct a BGP peer which has received an UPDATE with an unreachable NEXT_HOP to disable the peering session over which the invalid NEXT_HOP was received pending manual intervention.</t>
+
+</section>
+<!-- end of security considerations -->
+
+</middle>
+
+<back>
+<!-- References split into informative and normative -->
+
+<!-- There are 2 ways to insert reference entries from the citation libraries:
+1. define an ENTITY at the top, and use "ampersand character"RFC2629; here (as shown)
+2. simply use a PI "less than character"?rfc include="reference.RFC.2119.xml"?> here
+(for I-Ds: include="reference.I-D.narten-iana-considerations-rfc2434bis.xml")
+
+Both are cited textually in the same manner: by using xref elements.
+If you use the PI option, xml2rfc will, by default, try to find included files in the same
+directory as the including file. You can also define the XML_LIBRARY environment variable
+with a value containing a set of directories to search.  These can be either in the local
+filing system or remote ones accessed by http (http://domain/dir/... ).-->
+
+<references title="Normative References">
+<!--?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?-->
+&RFC2119;
+&RFC2545;
+&RFC4271;
+&RFC4291;
+
+</references>
+
+<references title="Informative References">
+&RFC2629;
+&RFC3552;
+
+</references>
+
+</back>
+</rfc>
