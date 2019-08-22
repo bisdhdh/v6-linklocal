@@ -23,13 +23,13 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
-<rfc category="std" docName="draft-white-linklocalnh-00" ipr="full3978">
+<rfc category="std" docName="draft-white-linklocalnh-00" ipr="trust200902">
 
 <front>
 
 <title>Link Local Next Hop Handling for BGP</title>
 
-<author fullname="Russ White" initials="R.W." role="author" surname="White">
+<author fullname="Russ White" initials="R.W." surname="White">
 <organization>Juniper Networks</organization>
 <address>
 <postal><street></street></postal>
@@ -37,7 +37,7 @@
 </address>
 </author>
 
-<author fullname="Donald Sharp" initials="D.S." role="author" surname="Sharp">
+<author fullname="Donald Sharp" initials="D.S." surname="Sharp">
 <organization>Cumulus Networks</organization>
 <address>
 <postal><street></street></postal>
@@ -45,7 +45,7 @@
 </address>
 </author>
 
-<author fullname="Dinesh Dutt" initials="D.D." role="author" surname="Dutt">
+<author fullname="Dinesh Dutt" initials="D.D." surname="Dutt">
 <organization></organization>
 <address>
 <postal><street></street></postal>
@@ -53,7 +53,7 @@
 </address>
 </author>
 
-<author fullname="Biswajit Sadhu" initials="B.S" role="author" surname="Sadhu">
+<author fullname="Biswajit Sadhu" initials="B.S" surname="Sadhu">
 <organization>VMWare</organization>
 <address>
 <postal><street></street></postal>
@@ -112,12 +112,7 @@
 <!-- end of receiver processing of IPv6 link local forwarding addresses -->
 
 <section anchor="Acknowledgements" title="Acknowledgements">
-<t>This template was derived from an initial version written by Pekka
-Savola and contributed by him to the xml2rfc project.</t>
-
-<t>The authors would like to thank Don Slice for his invaluable contribution to this draft. The authors would also like to thank acknolwedge Vipin Kumar, Pradosh Mohapatra, and Mike Valentine for their prior work in this area.</t>
-
-<t>This document is part of a plan to make xml2rfc indispensable <xref target="DOMINATION"></xref>.</t>
+<t>The authors would like to thank Don Slice, xxx, and yyy for their contributions to this draft.</t>
 
 </section>
 <!-- end of acknolwedgments section -->
