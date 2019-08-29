@@ -61,8 +61,15 @@
 </address>
 </author>
 
+<author fullname="Jeff Tantsura" initials="J.T." surname="Tantsura">
+<organization>Apstra, Inc.</organization>
+<address>
+<postal><street></street></postal>
+<email>jefftant.ietf@gmail.com</email>
+</address>
+</author>
 
-<date month="March" year="2007" />
+<date month="March" year="2019" />
 
 <area>Routing</area>
 <workgroup>Interdomain Routing</workgroup>
@@ -106,7 +113,9 @@
 
 <t>Implementations SHOULD check the validity of any IPv6 link local address used to calculate forwarding information by insuring the address is in the local neighbor table for the interface on which the BGP update was received (or through which the BGP speaker from which the update was received is reachable).</t>
 
-<t>If the Next Hop field is malformed, the implementation MUST send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation SHOULD send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
+<t>If the Next Hop field is malformed, the implementation SHALL be handling the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />. It MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. 
+If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation SHALL be handling the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />.
+The implementation MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
 
 </section>
 <!-- end of receiver processing of IPv6 link local forwarding addresses -->
@@ -155,7 +164,7 @@ filing system or remote ones accessed by http (http://domain/dir/... ).-->
 &RFC2545;
 &RFC4271;
 &RFC4291;
-
+&RFC7606;
 </references>
 
 <references title="Informative References">
