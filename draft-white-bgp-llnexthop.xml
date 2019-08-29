@@ -12,6 +12,7 @@
 <!ENTITY RFC3552 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml">
 <!ENTITY RFC4271 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4271.xml">
 <!ENTITY RFC4291 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4291.xml">
+<!ENTITY RFC7606 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7606.xml">
 <!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
 ]>
 
@@ -112,7 +113,9 @@
 <t>On receiving an MP_REACH_NLRI with a Next Hop length of 16, implementations SHOULD form the forwarding information using the IPv6 next hop contained in the Next Hop field, regardless of whether it is a link local or globally reachable IPv6 address.</t>
 
 <t>Implementations SHOULD check the validity of any IPv6 link local address used to calculate forwarding information by insuring the address is in the local neighbor table for the interface on which the BGP update was received (or through which the BGP speaker from which the update was received is reachable).</t>
+</section>
 
+<section title="Error handling">
 <t>If the Next Hop field is malformed, the implementation SHALL be handling the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />. It MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. 
 If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation SHALL be handling the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />.
 The implementation MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
