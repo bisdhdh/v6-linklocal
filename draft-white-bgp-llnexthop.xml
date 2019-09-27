@@ -12,6 +12,8 @@
 <!ENTITY RFC3552 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml">
 <!ENTITY RFC4271 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4271.xml">
 <!ENTITY RFC4291 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4291.xml">
+<!ENTITY RFC5925 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5925.xml">
+<!ENTITY RFC7454 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7454.xml">
 <!ENTITY RFC7606 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7606.xml">
 <!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
 ]>
@@ -97,27 +99,35 @@
 </section>
 <!-- end of introduction -->
 
+<section title="Acknowledgments">
+
+<t>The authors would like to thank Jeff Haas and John Scudder for their invaluable insights and contributions.</t>
+
+</section>
+<!-- end of ackonwledgments -->
+     
 <section title="Changes to BGP Next Hop Attribute to Support Link Local on Point-to-Point">
 
 <t><xref target="RFC2545" />, section 2, notes link local IPv6 addresses are not generally suitable for use in the Next Hop field of the MP_REACH_NLRI. In order to support the many uses of link local addresses, however, <xref target="RFC2545" /> constructs the Next Hop field in IPv6 route advertisements by setting the length of the field to 32, and including both a link local and global IPv6 address in the resulting enlarged field. In this way, the receiving BGP speaker can use the global IPv6 address to build local forwarding information, and the link local address for ICMPv6 redirects, etc. <xref target="RFC2545" /> does not, however, provide for situations where there is only a link local IPv6 address in the Next Hop field of the MP_REACH_NLRI. The result is each implementation which supports link local peering along with forwarding to a link local address has implemented the construction of the Next Hop field in the MP_REACH_NLRI when there is only a link local address available in slightly different ways.</t>
 
-<t>To indicate a link local forwarding address in the Next Hop field of the MP_REACH_NLRI, implementations SHOULD set the length of the Next Hop field to 16 and include only the IPv6 link local address in the Next Hop field. Alternatively, implementations MAY set the length of the Next Hop field to 32 and include a global address of 0::0/0 in the global IPv6 Next Hop field of the MP_REACH_NLRI. Implementations MUST use one of these two methods to indicate the link local address is to be used for forwarding.</t>
+<t>To indicate a link local forwarding address in the Next Hop field of the MP_REACH_NLRI, implementations MUST set the length of the Next Hop field to 16 and include only the IPv6 link local address in the Next Hop field.</t>
 
 </section>
 <!-- end of changes to BGP next hop section -->
 
 <section title="Receiver Processing of IPv6 Link Local Forwarding Addresses">
 
-<t>On receiving an MP_REACH_NLRI with a Next Hop length of 32, and 0::0/0 in the global IPv6 address, implementations SHOULD use the link local address contained in the Next Hop field to form forwarding information.</t>
-
 <t>On receiving an MP_REACH_NLRI with a Next Hop length of 16, implementations SHOULD form the forwarding information using the IPv6 next hop contained in the Next Hop field, regardless of whether it is a link local or globally reachable IPv6 address.</t>
 
-<t>Implementations SHOULD check the validity of any IPv6 link local address used to calculate forwarding information by insuring the address is in the local neighbor table for the interface on which the BGP update was received (or through which the BGP speaker from which the update was received is reachable).</t>
+<t>Implementations MAY check the validity of any IPv6 link local address used to calculate forwarding information by insuring the address is in the local neighbor table for the interface on which the BGP update was received (or through which the BGP speaker from which the update was received is reachable). There MUST be a configuration option to enable to disable this check.</t>
+
+<t>Note: It is possible that checking the IPv6 neighbor table for the existence or validity of a link local next hop may make instances where a link is being overwhelmed through some form of Deinal of Service (DoS) attack worse than they would otherwise be. If the IPv6 neighbor cache is overrun in a way that causes the link local address being used for BGP peering to be removed from the table, which is possible through an on-link DoS attack, any fresh BGP update will cause the entire peering session to fail if the implementation is checking the validity of link local next hops as described above. Operators should carefully assess the use of validation against the local IPv6 neighbor table to determine if it is appropriate for any particular peering session.</t>
+
 </section>
 
 <section title="Error handling">
-<t>If the Next Hop field is malformed, the implementation SHALL be handling the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />. It MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. 
-If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation SHALL be handling the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />.
+<t>If the Next Hop field is malformed, the implementation MUST handle the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />. It MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. 
+If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation MAY handle the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" /> (see note above on checking the local neighbor table for the correctness of the next hop).
 The implementation MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
 
 </section>
@@ -140,7 +150,11 @@ The implementation MAY send a NOTIFICATION message as described in section 4 of 
 
 <t>The mechanism described in this draft can be used as a component of ZTP for building BGP adjacencies across point-to-point links. This method, then, can be used by an attacker to form a peering session with a BGP speaker, ultimately advertising incorrect routing information into a routing domain in order to misdirect traffic or cause a denial of service. By using link local IPv6 addresses, the attacker would be able to forego the use of a valid IPv6 address within the domain, making such an attack easier.</t>
 
-<t>Operators SHOULD filter traffic on links where BGP peering is not intended to occur to prevent speakers from accepting BGP session requests. Operators MAY also use some form of cryptographic validation on links within the network to prevent unauthorized devices from forming BGP peering sessions. Operators also MAY instruct a BGP peer which has received an UPDATE with an unreachable NEXT_HOP to disable the peering session over which the invalid NEXT_HOP was received pending manual intervention.</t>
+<t>Operators SHOULD carefully consider security when deploying link local addresses for BGP peering. Operators SHOULD filter traffic on links where BGP peering is not intended to occur to prevent speakers from accepting BGP session requests, as well as other mechanisms described in <xref target="RFC7454" />.</t>
+     
+<t>Operators MAY also use some form of cryptographic validation on links within the network to prevent unauthorized devices from forming BGP peering sessions. Authentication, such as the TCP authentication described in <xref target="RFC5925" />, may provide some relief, if it is present and correctly configured. However, the distribution and management of keys in an environment where global addresses are not present on BGP speakers may be challenging.</t>
+     
+<t>Operators also MAY instruct a BGP peer which has received an UPDATE with an unreachable NEXT_HOP to disable the peering session over which the invalid NEXT_HOP was received pending manual intervention.</t>
 
 </section>
 <!-- end of security considerations -->
@@ -167,6 +181,8 @@ filing system or remote ones accessed by http (http://domain/dir/... ).-->
 &RFC2545;
 &RFC4271;
 &RFC4291;
+&RFC5925;
+&RFC7454;
 &RFC7606;
 </references>
 
