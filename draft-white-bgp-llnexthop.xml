@@ -98,19 +98,14 @@
 
 </section>
 <!-- end of introduction -->
-
-<section title="Acknowledgments">
-
-<t>The authors would like to thank Jeff Haas and John Scudder for their invaluable insights and contributions.</t>
-
-</section>
-<!-- end of ackonwledgments -->
      
 <section title="Changes to BGP Next Hop Attribute to Support Link Local on Point-to-Point">
 
 <t><xref target="RFC2545" />, section 2, notes link local IPv6 addresses are not generally suitable for use in the Next Hop field of the MP_REACH_NLRI. In order to support the many uses of link local addresses, however, <xref target="RFC2545" /> constructs the Next Hop field in IPv6 route advertisements by setting the length of the field to 32, and including both a link local and global IPv6 address in the resulting enlarged field. In this way, the receiving BGP speaker can use the global IPv6 address to build local forwarding information, and the link local address for ICMPv6 redirects, etc. <xref target="RFC2545" /> does not, however, provide for situations where there is only a link local IPv6 address in the Next Hop field of the MP_REACH_NLRI. The result is each implementation which supports link local peering along with forwarding to a link local address has implemented the construction of the Next Hop field in the MP_REACH_NLRI when there is only a link local address available in slightly different ways.</t>
 
-<t>To indicate a link local forwarding address in the Next Hop field of the MP_REACH_NLRI, implementations MUST set the length of the Next Hop field to 16 and include only the IPv6 link local address in the Next Hop field.</t>
+<t>If an implementation intends to send a single link local forwarding address in the Next Hop field of the MP_REACH_NLRI, it MUST set the length of the Next Hop field to 16 and include only the IPv6 link local address in the Next Hop field.</t>
+
+<t>If an implementation intends to send both a link local and globel IPv6 forwarding address in the Next Hop field of the MP_REACH_NLRI, it MUST set the length of the Next Hop field to 32 and include both the IPv6 link local and global IPv6 forwarding addresses in the Next Hop field. If both link local and global IPv6 forwarding addresses are carried in the Next Hop Field, the speaker SHOULD be locally configurable to determine which address is preferred for forwarding.</t>
 
 </section>
 <!-- end of changes to BGP next hop section -->
@@ -126,15 +121,18 @@
 </section>
 
 <section title="Error handling">
-<t>If the Next Hop field is malformed, the implementation MUST handle the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />. It MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field. 
-If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation MAY handle the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" /> (see note above on checking the local neighbor table for the correctness of the next hop).
-The implementation MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
+
+<t>A BGP speaker receiving an MP_REACH_NLRI with the length of the Next Hop Field set to 32, where the update contains anything other than a link local IPv6 address and a global IPv6 addresss, SHOULD consider this a malformed UPDATE message, and proceed as described in the following paragraphs. In order to support backwards compatibility with existing implementations, an implementation MAY ignore a second link local IPv6 address or 0::0/0 included with an IPv6 link local address when the length of the Next Hop Field is set to 32; in this case, the implementation SHOULD report the existence of this additional information so the operator can correct the sending BGP implementation.</t>
+
+<t>If the Next Hop field is malformed, the implementation MUST handle the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" />. It MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" />, using the UPDATE error message code indicating there is an invalid NEXT_HOP field</t>
+
+<t>If the Next Hop field is properly formed, but the link local next hop is not reachable (as determined by an examination of the IPv6 neighbor table), the implementation MAY handle the mailformed UPDATE message using the approach of "treat-as-withdraw", as described in section 7.3 of <xref target="RFC7606" /> (see note above on checking the local neighbor table for the correctness of the next hop). The implementation MAY send a NOTIFICATION message as described in section 4 of <xref target="RFC4271" /> using the UPDATE error message code (TBA), indicating a link local address was included in the MP_REACH_NLRI, but the link local address included cannot be reached. As this could indicate a security breach of some type (see the security considerations section below), the operator SHOULD have a local configuration option to terminate the peering session until manual intervention is initiated.</t>
 
 </section>
 <!-- end of receiver processing of IPv6 link local forwarding addresses -->
 
 <section anchor="Acknowledgements" title="Acknowledgements">
-<t>The authors would like to thank Don Slice, xxx, and yyy for their contributions to this draft.</t>
+<t>The authors would like to thank Don Slice, Jeff Haas, and John Scudder for their contributions to this draft.</t>
 
 </section>
 <!-- end of acknolwedgments section -->
