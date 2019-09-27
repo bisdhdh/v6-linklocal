@@ -105,7 +105,7 @@
 
 <t>If an implementation intends to send a single link local forwarding address in the Next Hop field of the MP_REACH_NLRI, it MUST set the length of the Next Hop field to 16 and include only the IPv6 link local address in the Next Hop field.</t>
 
-<t>If an implementation intends to send both a link local and globel IPv6 forwarding address in the Next Hop field of the MP_REACH_NLRI, it MUST set the length of the Next Hop field to 32 and include both the IPv6 link local and global IPv6 forwarding addresses in the Next Hop field. If both link local and global IPv6 forwarding addresses are carried in the Next Hop Field, the speaker SHOULD be locally configurable to determine which address is preferred for forwarding.</t>
+<t>If an implementation intends to send both a link local and global IPv6 forwarding address in the Next Hop field of the MP_REACH_NLRI, it MUST set the length of the Next Hop field to 32 and include both the IPv6 link local and global IPv6 forwarding addresses in the Next Hop field. If both link local and global IPv6 forwarding addresses are carried in the Next Hop Field, the speaker SHOULD be locally configurable to determine which address is preferred for forwarding.</t>
 
 </section>
 <!-- end of changes to BGP next hop section -->
